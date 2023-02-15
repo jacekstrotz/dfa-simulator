@@ -1,0 +1,5 @@
+a x c x
+0 1
+a
+c
+a b b c c a

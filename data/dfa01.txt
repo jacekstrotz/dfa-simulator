@@ -1,0 +1,4 @@
+a b c d f a a a b c b a b a b a a a
+0 1
+0 0 0 0 1
+a b c c c c c c c c c

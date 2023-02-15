@@ -1,0 +1,5 @@
+a b x
+0 x
+a
+z
+a b b c c a

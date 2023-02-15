@@ -1,0 +1,5 @@
+A b c d e
+0 1
+A
+A
+A b c e d A e d b c
