@@ -1,0 +1,9 @@
+// definition for a DFA that will accept the language 
+// that is the set of all binary strings which
+// represent unsigned binary numbers
+// (NOTE: we will accept the empty string)
+zero one        two
+0     1   
+zero
+zero
+zero one       two zero     one two

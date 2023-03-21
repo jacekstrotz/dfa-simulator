@@ -1,17 +1,12 @@
 /* Author: Jacek Strotz
- * Date: 1/12/23
- * Description: This class implements Runnable (Java's implementation of 
- * an asynchronous thread class) to create start, stop, and single-step
- * methods.
+ * Date: 2/5/23
+ * Description: This class uses a mix of five unique regular expressions and
+ * normal comparisons to validate a DFA definition provided by the user.
  */
 package dfa05;
 
 import javax.swing.JTextArea;
 
-/**
- *
- * @author strotz
- */
 public class DFA implements Runnable {
     private int count; 
     private int sleep_time;

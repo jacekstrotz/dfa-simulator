@@ -1,0 +1,8 @@
+// definition for a DFA that will accept the language 
+// that is the set of all binary strings which
+// end with 101 or start with 11
+ab b bc bd bcf bce bg bcg
+0 1
+ab
+bce bg bcg
+b bcf b bc bd bc b bce bd bg bd bc bg bcg bg bcg

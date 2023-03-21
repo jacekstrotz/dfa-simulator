@@ -1,7 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* Class: FrameMain.java
+ * Author: Jacek Strotz
+ * Description: this class provides a user interface for validating 
+ * DFA definitions. It can read input, find precise errors, and parse each
+ * definition if it is valid. This class makes heavy use of regular expressions
+ * to strictly fit the definition. 
+ *
+ * NOTE: Project description available at 
+ * https://copper.mountunion.edu/cs/csc/CSC450/Spring2023/hw/dfa/dfa05_description.html
  */
 package dfa05;
 
@@ -21,6 +26,7 @@ public class FrameMain extends javax.swing.JFrame {
         DefaultCaret caret = (DefaultCaret)outputArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); 
         
+        // clear combo box (sanity) and index the directory
         fileComboBox.removeAllItems();
         File[] listOfFiles = (new File("data/")).listFiles();
 
@@ -28,11 +34,14 @@ public class FrameMain extends javax.swing.JFrame {
         Arrays.sort(listOfFiles);
         for (File file : listOfFiles) {
             if (file.getName().contains("dfa")) {
-                fileComboBox.addItem(file.getName()); // ignore random files, only DFA
+                // ignore random files, only DFA type
+                fileComboBox.addItem(file.getName()); 
             }
         }
         
-       /* In in;
+        // ****** IMPORTANT ******
+        // To test every file provided in the class listing, uncomment this
+        /* In in;
         for (int i = 0; i < 17; i++) {
             try {
                 String s;
@@ -114,7 +123,7 @@ public class FrameMain extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(validButton, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -131,7 +140,9 @@ public class FrameMain extends javax.swing.JFrame {
                 fileComboBox.getSelectedItem() + "\n");
             }
             if (in != null && in.exists()) {
-                outputArea.setText(in.readAll().trim() + "\n");
+                // trim() removes preceding and succeeding whitespace;
+                // pointless to print this in the text area
+                outputArea.setText(in.readAll().trim() + "\n"); 
             }
         } else {
             try {

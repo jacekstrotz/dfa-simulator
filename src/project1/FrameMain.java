@@ -32,11 +32,12 @@ public class FrameMain extends javax.swing.JFrame {
         FlatDarkLaf.setup();
         
         initComponents();
-        dfa = new DFA(outputArea);
         
         // set caret to end position to auto-scroll
         DefaultCaret caret = (DefaultCaret)outputArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); 
+        
+        dfa = new DFA(outputArea);
         
         filterDFA();
         
@@ -48,6 +49,8 @@ public class FrameMain extends javax.swing.JFrame {
         for (File file : listOfFiles) 
             if (file.getName().contains("input")) 
                 inputFileComboBox.addItem(file.getName()); // ignore random files, only input
+        
+        optionComboBoxActionPerformed(null);
     }
     
     private void filterDFA() {
@@ -86,8 +89,21 @@ public class FrameMain extends javax.swing.JFrame {
         inputFileComboBox = new javax.swing.JComboBox<>();
         inputFileTextField = new javax.swing.JTextField();
         readInputButton = new javax.swing.JButton();
-        validCheckbox = new javax.swing.JCheckBox();
         filterCheckBox = new javax.swing.JCheckBox();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        dfaTextArea = new javax.swing.JTextArea();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        inputTextArea = new javax.swing.JTextArea();
+        dfaLabel = new javax.swing.JLabel();
+        inputLabel = new javax.swing.JLabel();
+        mainSeparator = new javax.swing.JSeparator();
+        jSeparator1 = new javax.swing.JSeparator();
+        mtCheckbox = new javax.swing.JCheckBox();
+        optionComboBox = new javax.swing.JComboBox<>();
+        speedSlider = new javax.swing.JSlider();
+        runButton = new javax.swing.JButton();
+        stepButton = new javax.swing.JButton();
+        resetButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(469, 306));
@@ -102,7 +118,7 @@ public class FrameMain extends javax.swing.JFrame {
         outputArea.setWrapStyleWord(true);
         jScrollPane1.setViewportView(outputArea);
 
-        readDFAButton.setText("Read DFA From File");
+        readDFAButton.setText("Read DFA");
         readDFAButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 readDFAButtonActionPerformed(evt);
@@ -131,21 +147,81 @@ public class FrameMain extends javax.swing.JFrame {
             }
         });
 
-        readInputButton.setText("Read Input from File");
+        readInputButton.setText("Read Input");
+        readInputButton.setPreferredSize(new java.awt.Dimension(90, 22));
         readInputButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 readInputButtonActionPerformed(evt);
             }
         });
 
-        validCheckbox.setSelected(true);
-        validCheckbox.setText("Show only valid strings");
-
         filterCheckBox.setSelected(true);
         filterCheckBox.setText("Filter proper DFAs");
         filterCheckBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 filterCheckBoxActionPerformed(evt);
+            }
+        });
+
+        dfaTextArea.setColumns(20);
+        dfaTextArea.setRows(5);
+        jScrollPane2.setViewportView(dfaTextArea);
+
+        inputTextArea.setColumns(20);
+        inputTextArea.setRows(5);
+        jScrollPane3.setViewportView(inputTextArea);
+
+        dfaLabel.setText("DFA");
+
+        inputLabel.setText("Input");
+
+        mtCheckbox.setSelected(true);
+        mtCheckbox.setText("Asynchronous");
+        mtCheckbox.setEnabled(false);
+        mtCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mtCheckboxActionPerformed(evt);
+            }
+        });
+
+        optionComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Show details", "Show results", "Show valid strings" }));
+        optionComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                optionComboBoxActionPerformed(evt);
+            }
+        });
+
+        speedSlider.setMajorTickSpacing(25);
+        speedSlider.setMaximum(999);
+        speedSlider.setMinimum(874);
+        speedSlider.setMinorTickSpacing(5);
+        speedSlider.setPaintTicks(true);
+        speedSlider.setToolTipText("Control the speed of the DFA");
+        speedSlider.setValue(995);
+        speedSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                speedSliderStateChanged(evt);
+            }
+        });
+
+        runButton.setText("Run");
+        runButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                runButtonActionPerformed(evt);
+            }
+        });
+
+        stepButton.setText("Step");
+        stepButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stepButtonActionPerformed(evt);
+            }
+        });
+
+        resetButton.setText("Reset");
+        resetButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetButtonActionPerformed(evt);
             }
         });
 
@@ -156,52 +232,96 @@ public class FrameMain extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
+                    .addComponent(mainSeparator, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(inputFileComboBox, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(inputFileTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(dfaFileComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(dfaFileTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(readInputButton, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-                            .addComponent(readDFAButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(validButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(validCheckbox)
-                            .addComponent(filterCheckBox))))
+                            .addComponent(filterCheckBox)
+                            .addComponent(mtCheckbox)
+                            .addComponent(optionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(8, 8, 8))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(dfaLabel)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(inputLabel)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(inputFileComboBox, 0, 363, Short.MAX_VALUE)
+                            .addComponent(inputFileTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(dfaFileComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(dfaFileTextField, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(readDFAButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(readInputButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(speedSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(runButton, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(stepButton, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(dfaFileComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dfaFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(readDFAButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(readDFAButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addComponent(mainSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(inputFileComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(inputFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(readInputButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(inputFileTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(readInputButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(stepButton, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                        .addComponent(runButton, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE))
+                    .addComponent(speedSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(resetButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dfaLabel)
+                    .addComponent(inputLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane3)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(validCheckbox)
+                        .addComponent(optionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(filterCheckBox))
-                    .addComponent(validButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(filterCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(mtCheckbox))
+                    .addComponent(validButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         pack();
@@ -211,8 +331,8 @@ public class FrameMain extends javax.swing.JFrame {
     private boolean readDFAButtonActionPerformed(java.awt.event.ActionEvent evt) {
         In in;
         // check for web URL
-        if (!((String)inputFileTextField.getText())
-                .matches("[h][t][t][p][s]?[:][/]{2}.*[.].*")) { 
+        if (!dfaFileTextField.getText()
+                .matches("(http)(s)?(:\\/\\/)(.)+")) { 
             try {
                 in = new In("data/" + dfaFileTextField.getText());
             }
@@ -222,13 +342,9 @@ public class FrameMain extends javax.swing.JFrame {
                         JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-            if (in.exists()) {
-                outputArea.setText(in.readAll().trim() + "\n");
-            }
         } else { 
             try {
                 in = new In(new URL((String)dfaFileTextField.getText()));
-                outputArea.setText(in.readAll().trim());
             }
             catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Failed to read from " 
@@ -237,13 +353,17 @@ public class FrameMain extends javax.swing.JFrame {
                 return false;
             }
         }
+        if (in.exists())
+                dfaTextArea.setText(in.readAll().trim());
         return true;
     }
 
     private void validButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validButtonActionPerformed
-        readDFAButtonActionPerformed(null);
-        //JOptionPane.showMessageDialog(null, dfa.validate(outputArea.getText()));
-        outputArea.append(dfa.validate(outputArea.getText()));
+        String e = dfa.validate(dfaTextArea.getText(), inputTextArea.getText());
+        if (!dfa.getValid() || !dfa.getInpValid()) {
+            JOptionPane.showMessageDialog(null, e, 
+                    "Alert", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_validButtonActionPerformed
 
     private void dfaFileComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dfaFileComboBoxActionPerformed
@@ -255,21 +375,10 @@ public class FrameMain extends javax.swing.JFrame {
     }//GEN-LAST:event_inputFileComboBoxActionPerformed
 
     private void readInputButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_readInputButtonActionPerformed
-        if (!readDFAButtonActionPerformed(null)) return;
-        String ret = dfa.validate(outputArea.getText());
-        if (!dfa.getValid()) {
-            JOptionPane.showMessageDialog(null, "DFA: " + ret, "Alert", 
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
         In in;
-        boolean valid = false;
-        int iterator = 0;
-        
         // check for web url
         if (!((String)inputFileTextField.getText())
-                .matches("[h][t][t][p][s]?[:][/]{2}.*[.].*")) { 
+                .matches("(http)(s)?(:\\/\\/)(.)+")) { 
             try {
                 in = new In("input/" + inputFileTextField.getText());                        
             }
@@ -290,35 +399,110 @@ public class FrameMain extends javax.swing.JFrame {
                 return;
             }
         }
-        while (in.hasNextLine()) {
-                    String line = in.readLine();
-                    iterator++;
-                    
-                    switch (dfa.executeDFA(line)) {
-                        case 0:
-                            valid = false;
-                            break;
-                        case 1:
-                            valid = true;
-                            break;
-                        case 3:
-                            return;
-                        default:
-                            break;
-                    }
-                    
-                    if (validCheckbox.isSelected()) {
-                        if (valid) 
-                            outputArea.append(line + " - accepted [line " + iterator + "]\n");
-                    }
-                    else
-                        outputArea.append(line + " - " + (valid ? "accepted\n" : "rejected\n"));
-                }
+        if (in.exists())
+            inputTextArea.setText(in.readAll().trim());
     }//GEN-LAST:event_readInputButtonActionPerformed
 
     private void filterCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filterCheckBoxActionPerformed
         filterDFA();
     }//GEN-LAST:event_filterCheckBoxActionPerformed
+
+    private void optionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_optionComboBoxActionPerformed
+        dfa.flags = 0;
+        if (mtCheckbox.isSelected()) dfa.flags |= 1 << 3;
+        
+        switch (optionComboBox.getSelectedIndex()) {
+            case 0:
+                dfa.flags |= 1;
+                break;
+            case 1:
+                dfa.flags |= 1 << 1;
+                break;
+            case 2:
+                dfa.flags |= 1 << 2;
+                break;
+        }
+    }//GEN-LAST:event_optionComboBoxActionPerformed
+
+    private void mtCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mtCheckboxActionPerformed
+        optionComboBoxActionPerformed(null);
+    }//GEN-LAST:event_mtCheckboxActionPerformed
+
+    private boolean validateAction() {
+        outputArea.setText("");
+        String e = dfa.validate(dfaTextArea.getText(), inputTextArea.getText());
+        if (!dfa.getInpValid() || !dfa.getValid()) {
+            JOptionPane.showMessageDialog(null, e, 
+                    "Alert", JOptionPane.ERROR_MESSAGE);
+            return false;
+        } 
+        
+        if (optionComboBox.getSelectedIndex() == 0) 
+            outputArea.setText(e + "\n"); 
+        
+        dfa.initialize(inputTextArea.getText().split("\n"));
+        return true;
+    }
+    
+    private void runButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runButtonActionPerformed
+        boolean ret = true;
+        if (dfa.getComplete()) 
+            ret = validateAction();
+        if (ret && dfa.getValid() && dfa.getInpValid()) {
+            if (runButton.getText().equals("Run")) {
+                runButton.setText("Pause");
+                dfa.setPause(false);
+            }
+            else {
+                runButton.setText("Run");
+                dfa.setPause(true);
+            }
+        }
+    }//GEN-LAST:event_runButtonActionPerformed
+
+    private void speedSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_speedSliderStateChanged
+        dfa.setSpeed(speedSlider.getValue());
+    }//GEN-LAST:event_speedSliderStateChanged
+
+    private void stepButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stepButtonActionPerformed
+        int len = outputArea.getText().length();
+        while (outputArea.getText().length() == len) {
+        if ((dfa.flags & 8) == 8) { // asynchronous
+                    switch(dfa.singleStep()) {
+                        case 0:
+                        case 3:
+                        default:
+                            break;
+                        case 1:
+                        case 2:
+                        case 4:
+                            dfa.setPause(true);
+                            FrameMain.runButton.setText("Run");
+                            break;
+                    }
+                }
+                else {
+                    // cannot be used async
+                    break;
+                }
+            
+            try {
+                Thread.sleep(2);
+            }
+            catch (Exception e) {
+
+            }
+        }
+    }//GEN-LAST:event_stepButtonActionPerformed
+
+    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
+        dfa.setValid(false);
+        dfa.setInpValid(false);
+        dfa.setPause(true);
+        dfa.setComplete(true);
+        outputArea.setText("");
+        runButton.setText("Run");
+    }//GEN-LAST:event_resetButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -341,14 +525,27 @@ public class FrameMain extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> dfaFileComboBox;
     private javax.swing.JTextField dfaFileTextField;
+    private javax.swing.JLabel dfaLabel;
+    private javax.swing.JTextArea dfaTextArea;
     private javax.swing.JCheckBox filterCheckBox;
     private javax.swing.JComboBox<String> inputFileComboBox;
     private javax.swing.JTextField inputFileTextField;
+    private javax.swing.JLabel inputLabel;
+    private javax.swing.JTextArea inputTextArea;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator mainSeparator;
+    private javax.swing.JCheckBox mtCheckbox;
+    private javax.swing.JComboBox<String> optionComboBox;
     private javax.swing.JTextArea outputArea;
     private javax.swing.JButton readDFAButton;
     private javax.swing.JButton readInputButton;
+    private javax.swing.JButton resetButton;
+    public static javax.swing.JButton runButton;
+    private javax.swing.JSlider speedSlider;
+    private javax.swing.JButton stepButton;
     private javax.swing.JButton validButton;
-    private javax.swing.JCheckBox validCheckbox;
     // End of variables declaration//GEN-END:variables
 }

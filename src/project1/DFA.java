@@ -13,10 +13,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
 public class DFA implements Runnable {
-    private int count; 
-    private int sleep_time;
     private boolean pause;
+    private boolean complete;
     private Thread thread;
+    private int sleep_time;
     
     private String[] states;
     private String[] alphabet;
@@ -24,48 +24,267 @@ public class DFA implements Runnable {
     private String[] accept_state;
     private String[] delta;
     
+    private String input; // single input string
+    private String[] input2; // array of all input strings
+    // iterator[0] is for the current input
+    // iterator[1] is for the input array
+    private int iterator[];
+    
+    private String current_state;
+    
     private boolean valid;
+    private boolean inp_valid;
+    
+    // make use of bitwise operations to set flags
+    public int flags;
+    
+    public String ret;
     
     private String[] regex = {
-        "(([a-zA-Z][0-9]*){1,}\\s?){1,}([a-zA-Z][0-9]*)*",
+        "(([a-zA-Z][0-9]*)*\\s?){1,}([a-zA-Z][0-9]*)*",
         "[a-zA-Z0-9][ ]?", 
         "(.{1,}\\n?){1,}",
         " {2,}",
-        "\\/\\/.*\\n"}; 
+        "\\/\\/.*\\n",
+        "\\w+\\n*"}; 
     
-    private JTextArea output;
+    private final JTextArea output;
     
     public DFA(JTextArea j) {
-        count = 0;
-        sleep_time = 500;
         pause = true;
+        output = j;
+        valid = false;
+        complete = true;
+        sleep_time = 5;
+        
         thread = new Thread(this);
         thread.start();
         
+        iterator = new int[]{0, 0};
+        flags = 0;
+    }
+    
+    public DFA(JTextArea j, String i) {
+        pause = true;
+        valid = false;
+        complete = true;
+        sleep_time = 5;
+        
         output = j;
+        input = i;
+        
+        thread = new Thread(this);
+        
+        iterator = new int[]{0, 0};
+        flags = 0;
+    }
+    
+    public DFA(JTextArea j, String d, String i) {
+        pause = true;
+        input = i;
+        output = j;
+        valid = false;
+        complete = true;
+        sleep_time = 5;
+        
+        String e = validate(d);
+        if (!valid) {
+            JOptionPane.showMessageDialog(null, e, 
+                    "Alert", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        pause = false;
+        thread = new Thread(this);
+  
+        iterator = new int[]{0, 0};
+        flags = 0;
     }
     
     public void reset() {
         pause = true;
-        count = 0;
+    }
+    
+    public void setSpeed(int ms) {
+        sleep_time = 1000 - ms;
+    }
+    
+    public int getSpeed() {
+        return sleep_time;
     }
     
     @Override
     public void run() {
         while (true) {
-            if (!pause) 
-                singleStep();
-            
-            try {
-                thread.sleep(sleep_time);
+            if (!pause) {
+                if ((flags & 8) == 8) { // asynchronous
+                    switch(singleStep()) {
+                        case 0:
+                        case 3:
+                        default:
+                            break;
+                        case 1:
+                        case 2:
+                        case 4:
+                            pause = true;
+                            complete = true;
+                            FrameMain.runButton.setText("Run");
+                            break;
+                    }
+                    try {
+                       Thread.sleep(sleep_time);
+                    }
+                    catch (Exception ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                }
+                else {
+                    //System.out.println("test");
+                    switch(singleStepA()) {
+                        case 0:
+                        case 3:
+                        default:
+                            break;
+                        case 1:
+                        case 2:
+                        case 4:
+                            output.append(ret);
+                            pause = true;
+                            complete = true;
+                            FrameMain.runButton.setText("Run");
+                            break;
+                    }
+                }
             }
-            catch (Exception ex) {}
+            else {
+                try {
+                    Thread.sleep(500);
+                }
+                catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
         }
     }
 
-    public void singleStep() {
-        count += 1; 
-        output.append("count: " + count + "\n");
+    public int singleStep() {
+        if (!valid) return 1; // sanity check
+        if (iterator[0] >= input.length()) {
+            boolean cont = arrayContains(accept_state, current_state);
+            
+            if ((flags & 4) == 4) {
+                if (cont) 
+                    output.append(input + " - accepted [line " + (iterator[1]+1) + "]\n");
+            }
+            else
+                output.append((input.length() == 0 ? "empty string" : input)
+                        + " - " + (cont ? "accepted\n" : "rejected\n"));
+                
+            if ((flags & 1) == 1)
+                output.append("\n");
+
+            if (iterator[1] < input2.length-1) {
+                input = input2[++iterator[1]];
+                iterator[0] = 0;
+                current_state = start_state;
+                
+                if ((flags & 1) == 1) 
+                    output.append("Current String: " + input + "\n");
+                
+                return 0;
+            }
+            else if (iterator[1] >= input2.length-1) {
+                pause = true;
+                return 2;
+            }
+        }
+        
+        // if input string contains a character not in alphabet,
+        // DFA cannot continue
+        if (!arrayContains(alphabet, input.charAt(iterator[0]))) {
+            JOptionPane.showMessageDialog(null, "Input contains non-alphabet"
+                    + " character", "Alert", JOptionPane.ERROR_MESSAGE);
+            return 4;
+        } 
+
+        // create a comparator in the format "sa|"
+        // where s - current state, a - input character
+        String comp = '-' + current_state + input.charAt(iterator[0]++) + "|";
+        // print delta function
+        if ((flags & 1) == 1) output.append("𝛿(" + current_state + ", " + 
+                input.charAt(iterator[0]-1) + ") = " + 
+                    delta[getIndexOfContains(delta, comp)].replace(comp, "") + "\n");
+        // if we can locate the index of "-sa|", we can check
+        // the letter after the "|" at that index to find the next state
+        current_state = delta[getIndexOfContains(delta, comp)].replace(comp, "");
+        return 0;
+    }
+    
+    public int singleStepA() {
+        if (!valid) return 1; // sanity check
+        if (iterator[0] >= input.length()) {
+            boolean cont = arrayContains(accept_state, current_state);
+
+            if ((flags & 4) == 4) {
+                if (cont)
+                    ret = ret.concat(input + " - accepted [line " + (iterator[1]+1) + "]\n");
+            }
+            else
+                ret = ret.concat((input.length() == 0 ? "empty string" : input)
+                    + " - " + (cont ? "accepted\n" : "rejected\n"));
+                
+            if ((flags & 1) == 1)
+                ret = ret.concat("\n");
+
+            if (iterator[1] < input2.length-1) {
+                input = input2[++iterator[1]];
+                iterator[0] = 0;
+                current_state = start_state;
+                
+                if ((flags & 1) == 1) 
+                    ret = ret.concat("Current String: " + input + "\n");
+                
+                return 0;
+            }
+            else if (iterator[1] >= input2.length-1) {
+                pause = true;
+                return 2;
+            }
+        }
+        
+        // if input string contains a character not in alphabet,
+        // DFA cannot continue
+        if (!arrayContains(alphabet, input.charAt(iterator[0]))) {
+            JOptionPane.showMessageDialog(null, "Input contains non-alphabet"
+                    + " character", "Alert", JOptionPane.ERROR_MESSAGE);
+            return 4;
+        } 
+
+        // create a comparator in the format "sa|"
+        // where s - current state, a - input character
+        String comp = '-' + current_state + input.charAt(iterator[0]++) + "|";
+        // print delta function
+        if ((flags & 1) == 1) ret = ret.concat("𝛿(" + current_state + ", " + 
+                input.charAt(iterator[0]-1) + ") = " + 
+                    delta[getIndexOfContains(delta, comp)].replace(comp, "") + "\n");
+        // if we can locate the index of "-sa|", we can check
+        // the letter after the "|" at that index to find the next state
+        current_state = delta[getIndexOfContains(delta, comp)].replace(comp, "");
+        return 0;
+    }
+    
+    public void initialize(String[] lines) {
+        input2 = lines;
+        input = lines[0];
+        
+        iterator = new int[]{0,0};
+        
+        current_state = start_state;
+        
+        ret = "";
+        
+        complete = false;
+        pause = false;
     }
     
     public void setPause(boolean pause) {
@@ -75,11 +294,7 @@ public class DFA implements Runnable {
     public boolean getPause() {
         return this.pause;
     }
-    
-    public void setSpeed(int ms) {
-        sleep_time = 1000 - ms;
-    }
-    
+
     private int getIndexOfContains(String[] input, String in) {
         for (int j = 0; j < input.length; j++)
             if (input[j].contains(in))
@@ -88,50 +303,62 @@ public class DFA implements Runnable {
         return -1;
     }
     
-    private boolean arrayContains(String[] input, char in) {
+    public boolean arrayContains(String[] input, char in) {
         for (String input1 : input)
-            if (input1.contains(""+in)) // simple cast char to string
+            if (input1.equals(""+in)) // simple cast char to string
                 return true;
         
         return false;
     }
     
-    private boolean arrayContains(String[] input, String in) {
+    public boolean arrayContains(String[] input, String in) {
         for (String input1 : input) 
-            if (input1.contains(in)) 
+            if (input1.equals(in)) 
                 return true;
         
         return false;
+    }
+    
+    public void execute() {
+        thread = new Thread(this);
+        thread.start();
     }
     
     public int executeDFA(String input) {
-        if (!valid) return 2; // sanity check
+        if (!valid || !inp_valid) return 2; // sanity check
         
-        String current_state = start_state;
+        //String current_state = start_state;
 
+        output.append("Current String: " + input + "\n");
         for (int i = 0; i < input.length(); i++) {
             // if input string contains a character not in alphabet,
             // DFA cannot continue
             if (!arrayContains(alphabet, input.charAt(i))) {
-                JOptionPane.showMessageDialog(output.getParent(), "Input contains non-alphabet"
-                        + " character");
+                JOptionPane.showMessageDialog(null, "Input contains non-alphabet"
+                        + " character", "Alert", JOptionPane.ERROR_MESSAGE);
                 return 3;
             } 
             
             // create a comparator in the format "sa|"
             // where s - current state, a - input character
-            String comp = current_state + input.charAt(i) + "|";
+            String comp = '-' + current_state + input.charAt(i) + "|";
+            // print delta function
+            //if (show_details) output.append("𝛿(" + current_state + ", " + 
+             //   input.charAt(i) + ") = " + 
+             //       delta[getIndexOfContains(delta, comp)].replace(comp, "") + "\n");
             // if we can locate the index of "sa|", we can check
             // the letter after the "|" at that index to find the next state
             current_state = delta[getIndexOfContains(delta, comp)].replace(comp, "");
         }
+        output.append("\n");
         // check if final state is within accepted states
         return arrayContains(accept_state, current_state) ? 1 : 0;
     }
     
-    public String validate(String i) {
+    public final String validate(String i) {
         String fail; // error handler string
         valid = false;
+        inp_valid = false;
         
         // regex[2] catches repeating whitespace
         // regex[3] checks the format of the definition
@@ -222,7 +449,7 @@ public class DFA implements Runnable {
         
         // search for states in delta that do not exist in Q
         for (String s : delta)
-            if (!lines[0].contains(s)) return "Issue in delta function: state \""
+            if (!arrayContains(states, s)) return "Issue in delta function: state \""
                     + s + "\" not in state set";
         
         valid = true;
@@ -252,15 +479,63 @@ public class DFA implements Runnable {
         
         // map delta function into format "sa|b", where
         // s - input state, a - input string, b - output state
+        // put a '-' before string to indicate beginning (for contains)
         for (int j = 0; j < temp.length / alphabet.length; j++) 
             for (int k = 0; k < alphabet.length; k++) 
-                delta[(alphabet.length)*j+k] = states[j] + alphabet[k] + '|' + temp[j*alphabet.length+k];
+                delta[(alphabet.length)*j+k] = '-' + states[j] + alphabet[k] + '|' + temp[j*alphabet.length+k];
   
         return ret;
         
     }
     
+    public final String validate(String d, String inp) {
+        String ret = validate(d);
+        if (!valid) return ret;
+        
+        //if (!inp.matches(regex[5]))
+        //    return "Invalid input data format.";
+        
+        String[] lines = inp.split("\n");
+        
+        for (String line : lines) {
+            for (int j = 0; j < line.length(); j++) {
+                if (!arrayContains(alphabet, line.charAt(j))) {
+                    //JOptionPane.showMessageDialog(null, "Input contains non-alphabet"
+                    // + " character", "Alert", JOptionPane.ERROR_MESSAGE);
+                    return "Input contains non-alphabet"
+                            + " character";
+                } 
+            }
+        }
+        inp_valid = true;
+        return ret;
+    }
+    
     public boolean getValid() {
         return valid;
+    }
+    
+    public boolean getInpValid() {
+        return inp_valid;
+    }
+    
+    public void setInput(String i) {
+        input = i;
+    }
+    
+    public boolean getComplete() {
+        return complete;
+    }
+    
+    public void setValid(boolean v) {
+        valid = v;
+    }
+    
+    public void setInpValid(boolean i) {
+        inp_valid = i;
+    }
+    
+    public void setComplete(boolean c) {
+        complete = c;
     }
 }
